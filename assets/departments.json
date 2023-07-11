@@ -1,0 +1,17 @@
+[
+  {"name": "Wasser und Landnutzung",
+    "query": "Forschung zu Wasser, Landnutzung, Landmanagement",
+    "description": ""},
+  {"name": "Biodiversität und Gesellschaft",
+    "query": "Forschung zu Biodiversität, Bioökonomie, sozial-ökologischen Systemen, Naturschutz, Wald",
+    "description": ""},
+  {"name": "Gekoppelte Infrastrukturen",
+    "query": "Forschung zu Wasser, Wasserinfrastruktur, Stoffeinträgen, Chemikalien, Risiken, Ressourcenmanagement, Wasserstoff",
+    "description": ""},
+  {"name": "Nachhaltige Gesellschaft",
+    "query": "Forschung zu Energie, Klima, Mobilität, Stadt, Konsum, Ernährung, Gender",
+    "description": ""},
+  {"name": "Transdisziplinarität",
+    "query": "Wissenschaftsforschung, Begleitforschung, Reallabore, partizipative Forschung",
+    "description": ""}
+]
