@@ -1,0 +1,14 @@
+a:link {color: #007cbf; text-decoration: none;}
+div {line-height: 1.6;}
+h1, h2, h3 {color: #eaeaea !important;}
+h4, h5, h6 {color: #00adb5 !important;}
+[data-testid="stHeader"]::before {
+                content: "ai4ki";
+                font-family: Arial, sans-serif;
+                font-weight: bold;
+                font-size: 40px;
+                color: #0f5670;
+                position: relative;
+                left: 50px;
+                top: 0px;
+            }
