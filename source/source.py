@@ -165,7 +165,7 @@ def evaluate_calls(df, k, query, ce_check=False):
 
     # Encode the call titles using the Bi-Encoder and store as new df column
     df['embeddings'] = df.call.apply(
-        lambda x: query_transformer({"inputs": x}))
+        lambda x: query_transformer(API_URL_BE, {"inputs": x}))
 
     # Calculate similarity between query embedding and the embeddings of all call titles and store as new df column
     df['be_scores'] = distances_from_embeddings(query_embedding, df['embeddings'].values, distance_metric='cosine')
