@@ -161,7 +161,7 @@ def evaluate_calls(df, k, query, ce_check=False):
     """
 
     # Encode the query using the Bi-Encoder
-    query_embedding = query_transformer({"inputs": query})
+    query_embedding = query_transformer(API_URL_BE, {"inputs": query})
 
     # Encode the call titles using the Bi-Encoder and store as new df column
     df['embeddings'] = df.call.apply(
@@ -177,7 +177,7 @@ def evaluate_calls(df, k, query, ce_check=False):
     if ce_check:
         # Score k calls with largest be_scores with Cross-Encoder
         cross_encoder_input = [[query, r.call] for _, r in df_top_k.iterrows()]
-        df_top_k['ce_scores'] = query_transformer({"inputs": cross_encoder_input})
+        df_top_k['ce_scores'] = query_transformer(API_URL_CE, {"inputs": cross_encoder_input})
 
     return df_top_k
 
