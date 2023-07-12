@@ -4,17 +4,18 @@ import imaplib
 import openai
 import os
 import pandas as pd
+import requests
 import streamlit as st
 
 from datetime import datetime, timedelta
 from scipy import spatial
-from sentence_transformers import SentenceTransformer, CrossEncoder
 
 # Secrets
 OPENAI_API_KEY = os.environ['OPENAI_API_KEY']
 EMAIL = os.environ['EMAIL']
 PASSWORD = os.environ['PASSWORD']
 IMAP_SERVER = os.environ['IMAP_SERVER']
+API_TOKEN = os.environ['API_TOKEN']
 
 # Download emails from the past x days
 EMAIL_RANGE = 7
@@ -25,23 +26,15 @@ openai.api_key = OPENAI_API_KEY
 # Set device for sentence transformer inference
 device = "cpu"
 
+API_URL_BE = "https://api-inference.huggingface.co/models/T-Systems-onsite/cross-en-de-roberta-sentence-transformer"
+API_URL_CE = "https://api-inference.huggingface.co/models/cross-encoder/msmarco-MiniLM-L6-en-de-v1"
 
-def load_transformers(ce_flag):
-    """Load bi-encoder and cross-encoder
+headers = {"Authorization": f"Bearer {API_TOKEN}"}
 
-    Keyword argument:
-    ce_flag: bool -- flag for loading cross-encoder
-    """
 
-    if "bi_encoder" not in st.session_state:
-        st.session_state.bi_encoder = SentenceTransformer('T-Systems-onsite/cross-en-de-roberta-sentence-transformer',
-                                                          device=device)
-
-    if ce_flag:
-        if "cross_encoder" not in st.session_state:
-            st.session_state.cross_encoder = CrossEncoder('cross-encoder/msmarco-MiniLM-L6-en-de-v1',
-                                                          device=device,
-                                                          max_length=512)
+def query_transformer(api_url, payload):
+	response = requests.post(api_url, headers=headers, json=payload)
+	return response.json()
 
 
 def get_mail_data(subfolder):
@@ -168,11 +161,11 @@ def evaluate_calls(df, k, query, ce_check=False):
     """
 
     # Encode the query using the Bi-Encoder
-    query_embedding = st.session_state.bi_encoder.encode(query, show_progress_bar=False, device=device)
+    query_embedding = query_transformer({"inputs": query})
 
     # Encode the call titles using the Bi-Encoder and store as new df column
     df['embeddings'] = df.call.apply(
-        lambda x: st.session_state.bi_encoder.encode(x, show_progress_bar=False, device=device))
+        lambda x: query_transformer({"inputs": x}))
 
     # Calculate similarity between query embedding and the embeddings of all call titles and store as new df column
     df['be_scores'] = distances_from_embeddings(query_embedding, df['embeddings'].values, distance_metric='cosine')
@@ -184,7 +177,7 @@ def evaluate_calls(df, k, query, ce_check=False):
     if ce_check:
         # Score k calls with largest be_scores with Cross-Encoder
         cross_encoder_input = [[query, r.call] for _, r in df_top_k.iterrows()]
-        df_top_k['ce_scores'] = st.session_state.cross_encoder.predict(cross_encoder_input, show_progress_bar=False)
+        df_top_k['ce_scores'] = query_transformer({"inputs": cross_encoder_input})
 
     return df_top_k
 
