@@ -1,7 +1,7 @@
 import json
 import streamlit as st
 
-from source.source import (load_transformers,
+from source.source import (query_transformer,
                            get_mail_data,
                            preprocess_nl,
                            evaluate_calls,
@@ -14,9 +14,6 @@ run_ce_check = False
 scores = 'be_scores'
 if run_ce_check:
     scores = 'ce_scores'
-
-# Load transformer models
-load_transformers(run_ce_check)
 
 # Load titles, queries, and descriptions of research departments
 with open("./assets/departments.json", "r", encoding="utf-8") as f:
