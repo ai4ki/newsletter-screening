@@ -40,6 +40,7 @@ def query_transformer(api_url, payload):
 	# response is of type List[List[List]]] --> len(outer list)=number of inputs; inner lists: one 'matrix' for each input
 	# here we have only one input ==> response[0]
 	# apply mean pooling to token embeddungs
+		print("MODEL RESPONSE: ", response)
 		token_embeddings = np.array(response[0])
 		sentence_embedding = np.mean(token_embeddings, axis=0)
 	except:
