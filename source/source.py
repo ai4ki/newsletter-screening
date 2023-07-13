@@ -34,13 +34,17 @@ headers = {"Authorization": f"Bearer {API_TOKEN}"}
 
 
 def query_transformer(api_url, payload):
-	response = requests.post(api_url, headers=headers, json=payload)
+	try:
+		response = requests.post(api_url, headers=headers, json=payload)
 	# model is here output is token level embeddings matrix of (n_tokens, model_dim)
 	# response is of type List[List[List]]] --> len(outer list)=number of inputs; inner lists: one 'matrix' for each input
 	# here we have only one input ==> response[0]
 	# apply mean pooling to token embeddungs
-	token_embeddings = np.array(response[0])
-	sentence_embedding = np.mean(token_embeddings, axis=0)
+		token_embeddings = np.array(response[0])
+		sentence_embedding = np.mean(token_embeddings, axis=0)
+	except:
+		st.warning("Model not ready!")
+		pass
 	return sentence_embedding
 
 
