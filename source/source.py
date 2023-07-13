@@ -34,6 +34,7 @@ headers = {"Authorization": f"Bearer {API_TOKEN}"}
 
 
 def query_transformer(api_url, payload):
+	sentence_embedding = np.array(768,)
 	try:
 		response = requests.post(api_url, headers=headers, json=payload)
 	# model is here output is token level embeddings matrix of (n_tokens, model_dim)
