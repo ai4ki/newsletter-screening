@@ -1,3 +1,2 @@
 # Newsletter Screening
-This app downloads and screens a newsletter of public calls for bids in the areas of research and services. It is customizied to the requirements of a specific German research institution.
-
+This application downloads and screens a newsletter of public tenders in the fields of research and general services. It is tailored to the needs of a specific German research institution.
