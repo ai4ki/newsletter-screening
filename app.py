@@ -79,10 +79,12 @@ with cols[0]:
     nl_analyze = st.button("Newsletter auswerten")
 
 # Load transformer models
-try:
-    load_transformers(run_ce_check)
-except:
-    st.warning("Some error occured while loading models -- plaese rerun the app!")
+with cols[1]:
+    with st.spinner("Wir laden das Modell -- bitte hab einen Augenblick Geduld :)"):
+        try:
+            load_transformers(run_ce_check)
+        except:
+            st.warning("Some error occured while loading models -- please rerun the app!")
 
 # Build the page's second column: evaluation results
 if nl_analyze:
