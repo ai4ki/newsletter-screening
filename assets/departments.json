@@ -1,17 +1,17 @@
 [
   {"name": "Wasser und Landnutzung",
     "query": "Forschung zu Wasser, Landnutzung, Landmanagement",
-    "description": ""},
+    "description": "Die Forschungsabteilung 'Wasser und Landnutzung' beschäftigt sich mit der Fragestellung, wie ein integriertes Management von Wasser- und Landressourcen unter den komplexen Verflechtungen gesellschaftlicher und naturräumlicher Rahmenbedingungen gestaltet werden kann."},
   {"name": "Biodiversität und Gesellschaft",
     "query": "Forschung zu Biodiversität, Bioökonomie, sozial-ökologischen Systemen, Naturschutz, Wald",
-    "description": ""},
+    "description": "In der Forschungsabteilung 'Biodiversität und Gesellschaft' untersuchen wir das Zusammenwirken von Gesellschaft und Biodiversität. Die dabei entstehenden Nutzungsdynamiken von Biodiversität sowie die Muster in den Beziehungen zwischen Ökosystemen und Gesellschaft stehen im Mittelpunkt. Diese umfassen das Biodiversitätsbewusstsein von Akteursgruppen, Nutzungskonflikte sowie Nutzungs- und Managementstrategien für eine sozial-ökologische Transformation."},
   {"name": "Gekoppelte Infrastrukturen",
     "query": "Forschung zu Wasser, Wasserinfrastruktur, Stoffeinträgen, Chemikalien, Risiken, Ressourcenmanagement, Wasserstoff",
-    "description": ""},
+    "description": "In der Forschungsabteilung 'Gekoppelte Infrastrukturen' legen wir den Fokus auf sozial-ökologische Transformationen von Infrastruktur- und Versorgungssystemen sowie deren gegenseitige Abhängigkeiten und Wechselwirkungen (z.B. Ko-Transformationen). Dabei nehmen wir insbesondere sozio-technische Innovationen und Transformationsrisiken in den Blick."},
   {"name": "Nachhaltige Gesellschaft",
     "query": "Forschung zu Energie, Klima, Mobilität, Stadt, Konsum, Ernährung, Gender",
-    "description": ""},
+    "description": "In der Forschungsabteilung 'Nachhaltige Gesellschaft' untersuchen wir, wie nachhaltige Lebensstile in den Bereichen Mobilität, Wohnen, Ernährung, Biodiversität oder Energie gelingen können. Relevant sind dabei vor allem Alltagspraktiken und die Befriedigung von Grundbedürfnissen."},
   {"name": "Transdisziplinarität",
-    "query": "Wissenschaftsforschung, Begleitforschung, Reallabore, partizipative Forschung",
-    "description": ""}
+    "query": "Wissenschaftsforschung, Begleitforschung, Reallabore, partizipative Forschung, Wirkungsforschung",
+    "description": "In der Forschungsabteilung 'Transdisziplinarität' entwickeln wir theoretisch-konzeptionelle und methodische Grundlagen, die eine hohe wissenschaftliche Qualität und die angestrebte gesellschaftliche Wirkung transdisziplinärer Forschungsprozesse gewährleisten. Wir beraten und begleiten außerdem Forschungsprojekte bei der Gestaltung transdisziplinärer Zusammenarbeit und unterstützen Projekte oder Institutionen bei der Analyse ihrer gesellschaftlichen Wirkungen. "}
 ]
