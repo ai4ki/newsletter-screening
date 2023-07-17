@@ -154,6 +154,17 @@ def distances_from_embeddings(query_embedding, embeddings, distance_metric="cosi
     return distances
 
 
+def encode_calls(df):
+    """Encode the call titles using the Bi-Encoder and store as new df column
+
+        Keyword arguments:
+        df: Pandas dataframe --> call data (from preprocess_nl)
+    """
+
+    df['embeddings'] = df.call.apply(
+        lambda x: st.session_state.bi_encoder.encode(x, show_progress_bar=False, device=device))
+
+
 def evaluate_calls(df, k, query, ce_check=False):
     """Evaluate calls newsletter by predicting semantic similarity between dept. query and call titles
 
@@ -169,10 +180,6 @@ def evaluate_calls(df, k, query, ce_check=False):
 
     # Encode the query using the Bi-Encoder
     query_embedding = st.session_state.bi_encoder.encode(query, show_progress_bar=False, device=device)
-
-    # Encode the call titles using the Bi-Encoder and store as new df column
-    df['embeddings'] = df.call.apply(
-        lambda x: st.session_state.bi_encoder.encode(x, show_progress_bar=False, device=device))
 
     # Calculate similarity between query embedding and the embeddings of all call titles and store as new df column
     df['be_scores'] = distances_from_embeddings(query_embedding, df['embeddings'].values, distance_metric='cosine')
