@@ -2,12 +2,12 @@ import json
 import streamlit as st
 
 from source.source_local import (load_transformers,
-                           get_mail_data,
-                           preprocess_nl,
-                           evaluate_calls,
-                           keyword_check,
-                           ask_llm,
-                           format_call)
+                                 get_mail_data,
+                                 preprocess_nl,
+                                 evaluate_calls,
+                                 keyword_check,
+                                 ask_llm,
+                                 format_call)
 
 # Set flag for Cross-Encoder re-ranking
 run_ce_check = False
@@ -16,7 +16,10 @@ if run_ce_check:
     scores = 'ce_scores'
 
 # Load transformer models
-load_transformers(run_ce_check)
+try:
+    load_transformers(run_ce_check)
+except:
+    st.warning("Some error occured while loading models -- plaese rerun the app!")
 
 # Load titles, queries, and descriptions of research departments
 with open("./assets/departments.json", "r", encoding="utf-8") as f:
@@ -53,13 +56,16 @@ with st.sidebar:
 
 # Load emails from server if not already in session state
 if "mail_data" not in st.session_state:
-    st.session_state.mail_data = get_mail_data("service.bund.de")
+    try:
+        st.session_state.mail_data = get_mail_data("service.bund.de")
+    except ConnectionError:
+        st.warning("Connection to email server failed -- please rerun the app!")
+    except:
+        st.warning("We have trouble downloading your emails -- please rerun the app!")
 
 if st.session_state.mail_data:
     n_newsletters = st.session_state.mail_data["total"]
     newsletters = [st.session_state.mail_data["data"][nl]["date"] for nl in range(n_newsletters)]
-else:
-    st.warning("Sorry, beim Download der Newsletter ist etwas schief gegangen :(")
 
 # Set threshold for LLM evaluation
 llm_threshold = 4 if llm_flag == "streng" else 2
@@ -117,8 +123,9 @@ if nl_analyze:
                                 st.markdown(f"{client_data}", unsafe_allow_html=True)
                                 one_call_passed = True
                         else:
-                            st.markdown(f"{client_data}**Achtung: Es erfolgte keine Bewertung durch die KI!**",
-                                        unsafe_allow_html=True)
+                            st.markdown(
+                                f"{client_data}**Achtung: Es erfolgte keine Bewertung durch das Sprachmodell!**",
+                                unsafe_allow_html=True)
 
                 if llm_flag != "nein" and not one_call_passed:
                     st.markdown("In dieser Ausgabe gab es für das Forschungsfeld keine passenden Ausschreibungen.")
