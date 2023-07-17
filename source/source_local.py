@@ -212,7 +212,7 @@ def ask_llm(d_description, call_title):
 
         Forschungsabteilung: {d_description}
 
-        Nicht vergessen: Antworte nur mit dem Score! 
+        Denk daran: Antworte nur mit dem Score! 
         """
 
     # Construct  model prompt
@@ -228,22 +228,22 @@ def ask_llm(d_description, call_title):
     evaluation = ""
     try:
         evaluation = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4",
             max_tokens=1,
             temperature=0.0,
             top_p=1.0,
             messages=messages
         )["choices"][0]["message"]["content"]
     except openai.error.APIError as e:
-        st.warning(f"OpenAI API returned an API Error: {e}")
+        st.warning(f"Language model API returned an API Error: {e}")
     except openai.error.APIConnectionError as e:
-        st.warning(f"Failed to connect to OpenAI API: {e}")
+        st.warning(f"Failed to connect to language model API: {e}")
     except openai.error.RateLimitError as e:
-        st.warning(f"OpenAI API request exceeded rate limit: {e}")
+        st.warning(f"Language model API request exceeded rate limit: {e}")
     except openai.error.InvalidRequestError as e:
-        st.warning(f"OpenAI API request exceeded rate limit: {e}")
+        st.warning(f"Language model API request exceeded rate limit: {e}")
     except openai.error.ServiceUnavailableError as e:
-        st.warning(f"OpenAI API request exceeded rate limit: {e}")
+        st.warning(f"Language model API request exceeded rate limit: {e}")
 
     return evaluation
 
