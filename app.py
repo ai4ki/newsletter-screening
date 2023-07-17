@@ -4,26 +4,11 @@ import streamlit as st
 from source.source_local import (load_transformers,
                                  get_mail_data,
                                  preprocess_nl,
+                                 encode_calls,
                                  evaluate_calls,
                                  keyword_check,
                                  ask_llm,
                                  format_call)
-
-# Set flag for Cross-Encoder re-ranking
-run_ce_check = False
-scores = 'be_scores'
-if run_ce_check:
-    scores = 'ce_scores'
-
-# Load transformer models
-try:
-    load_transformers(run_ce_check)
-except:
-    st.warning("Some error occured while loading models -- plaese rerun the app!")
-
-# Load titles, queries, and descriptions of research departments
-with open("./assets/departments.json", "r", encoding="utf-8") as f:
-    departments = json.load(f)
 
 # Load page text
 with open("./assets/page_text.txt", "r", encoding="utf-8") as f:
@@ -54,6 +39,15 @@ with st.sidebar:
     with st.expander("Was steckt dahinter?"):
         st.markdown(page_text["llm"])
 
+# Set threshold for LLM evaluation
+llm_threshold = 4 if llm_flag == "streng" else 2
+
+# Set flag for Cross-Encoder re-ranking
+run_ce_check = False
+scores = 'be_scores'
+if run_ce_check:
+    scores = 'ce_scores'
+
 # Load emails from server if not already in session state
 if "mail_data" not in st.session_state:
     try:
@@ -66,9 +60,6 @@ if "mail_data" not in st.session_state:
 if st.session_state.mail_data:
     n_newsletters = st.session_state.mail_data["total"]
     newsletters = [st.session_state.mail_data["data"][nl]["date"] for nl in range(n_newsletters)]
-
-# Set threshold for LLM evaluation
-llm_threshold = 4 if llm_flag == "streng" else 2
 
 # Build the page's first column: select a newsletter and display as table
 with cols[0]:
@@ -87,8 +78,18 @@ with cols[0]:
     st.markdown("")
     nl_analyze = st.button("Newsletter auswerten")
 
+# Load transformer models
+try:
+    load_transformers(run_ce_check)
+except:
+    st.warning("Some error occured while loading models -- plaese rerun the app!")
+
 # Build the page's second column: evaluation results
 if nl_analyze:
+    # Load titles, queries, and descriptions of research departments
+    with open("./assets/departments.json", "r", encoding="utf-8") as f:
+        departments = json.load(f)
+
     # Make a copy of the newsletter dataframe
     filtered_df = nl_as_df.copy()
 
@@ -96,6 +97,9 @@ if nl_analyze:
     condition = filtered_df.call.apply(lambda x: keyword_check(x))
     filtered_df = filtered_df.loc[condition]
     n_calls_filtered = len(filtered_df.index)
+
+    # Encode calls once with Bi-Encoder
+    encode_calls(filtered_df)
 
     # Take care of (rare) cases where number of calls is smaller than top_k
     top_k_be = min(top_k, n_calls_filtered)
