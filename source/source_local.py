@@ -45,6 +45,7 @@ def load_transformers(ce_flag):
                                                           max_length=512)
 
 
+@st.cache_resource
 def load_transformers_stateless(ce_flag):
     """Load bi-encoder and cross-encoder
 
