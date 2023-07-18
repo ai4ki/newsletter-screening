@@ -1,7 +1,7 @@
 import json
 import streamlit as st
 
-from source.source_local import (load_transformers,
+from source.source_local import (load_transformers_stateless,
                                  get_mail_data,
                                  preprocess_nl,
                                  encode_calls,
@@ -82,7 +82,7 @@ with cols[0]:
 with cols[1]:
     with st.spinner("Wir laden das Modell -- bitte hab einen Augenblick Geduld :)"):
         try:
-            load_transformers(run_ce_check)
+            encoder, _ = load_transformers_stateless(run_ce_check)
         except:
             st.warning("Some error occured while loading models -- please rerun the app!")
 
@@ -101,7 +101,7 @@ if nl_analyze:
     n_calls_filtered = len(filtered_df.index)
 
     # Encode calls once with Bi-Encoder
-    encode_calls(filtered_df)
+    encode_calls(filtered_df, encoder)
 
     # Take care of (rare) cases where number of calls is smaller than top_k
     top_k_be = min(top_k, n_calls_filtered)
@@ -110,7 +110,7 @@ if nl_analyze:
         st.markdown("### Auswertung")
         tabs = st.tabs(["FF1", "FF2", "FF3", "FF4", "FF5"])
         for i, dept in enumerate(departments):
-            results_df = evaluate_calls(filtered_df, top_k_be, dept["query"], ce_check=run_ce_check)
+            results_df = evaluate_calls(filtered_df, top_k_be, dept["query"], encoder, None, ce_check=run_ce_check)
             eval_llm = ""
             one_call_passed = False
 
