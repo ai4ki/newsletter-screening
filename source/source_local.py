@@ -5,11 +5,10 @@ import openai
 import os
 import pandas as pd
 import streamlit as st
-import sys
 
 from datetime import datetime, timedelta
 from scipy import spatial
-from sentence_transformers import SentenceTransformer, CrossEncoder
+from sentence_transformers import SentenceTransformer
 
 # Secrets
 OPENAI_API_KEY = os.environ['OPENAI_API_KEY']
@@ -27,40 +26,8 @@ openai.api_key = OPENAI_API_KEY
 device = "cpu"
 
 
-def load_transformers(ce_flag):
-    """Load bi-encoder and cross-encoder
-
-    Keyword argument:
-    ce_flag: bool -- flag for loading cross-encoder
-    """
-
-    if "bi_encoder" not in st.session_state:
-        st.session_state.bi_encoder = SentenceTransformer('T-Systems-onsite/cross-en-de-roberta-sentence-transformer',
-                                                          device=device)
-
-    if ce_flag:
-        if "cross_encoder" not in st.session_state:
-            st.session_state.cross_encoder = CrossEncoder('cross-encoder/msmarco-MiniLM-L6-en-de-v1',
-                                                          device=device,
-                                                          max_length=512)
-
-
-def load_transformers_stateless(ce_flag):
-    """Load bi-encoder and cross-encoder
-
-    Keyword argument:
-    ce_flag: bool -- flag for loading cross-encoder
-    """
-
-    bi_encoder = SentenceTransformer('T-Systems-onsite/cross-en-de-roberta-sentence-transformer',
-                                                          device=device)
-    cross_encoder = None
-    if ce_flag:
-        cross_encoder = CrossEncoder('cross-encoder/msmarco-MiniLM-L6-en-de-v1',
-                                                          device=device,
-                                                          max_length=512)
-
-    return bi_encoder, cross_encoder
+def load_sentence_transformer():
+    return SentenceTransformer('T-Systems-onsite/cross-en-de-roberta-sentence-transformer', device=device)
 
 
 def get_mail_data(subfolder):
@@ -130,7 +97,7 @@ def preprocess_nl(content):
 
     Returns:
     call_list: list[list] --> inner list: [title, url, client_info]
-    df: Pandas dataframe --> one row for each call in newsletter with cols. acc. to. call_list
+    df: Pandas dataframe --> one row for each call in newsletter with cols. acc. to call_list
     """
 
     text_pp = []
@@ -173,7 +140,7 @@ def distances_from_embeddings(query_embedding, embeddings, distance_metric="cosi
     return distances
 
 
-def encode_calls(df, encoder):
+def encode_calls(df, bi_encoder):
     """Encode the call titles using the Bi-Encoder and store as new df column
 
         Keyword arguments:
@@ -181,24 +148,24 @@ def encode_calls(df, encoder):
     """
 
     df['embeddings'] = df.call.apply(
-        lambda x: encoder.encode(x, show_progress_bar=False, device=device))
+        lambda x: bi_encoder.encode(x, show_progress_bar=False, device=device))
 
 
-def evaluate_calls(df, k, query, encoder_1, encoder_2, ce_check=False):
+def evaluate_calls(df, k, query, bi_encoder):
     """Evaluate calls newsletter by predicting semantic similarity between dept. query and call titles
 
     Keyword arguments:
     df: Pandas dataframe --> call data (from preprocess_nl)
     k: int --> Top-k, keep the k calls with the highest cosine similarity to query
-    query: str --> concatenation of query_prefix and dept. name
-    ce_check: bool --> whether to perform re-ranking with Cross-Encoder; defaults to False
+    query: str --> query as defined in departments.json
+    encoder: class --> sentence transformer model for feature extraction
 
     Returns:
     df_top_k: Pandas dataframe --> call data for k calls with highest cosine similarity
     """
 
     # Encode the query using the Bi-Encoder
-    query_embedding = encoder_1.encode(query, show_progress_bar=False, device=device)
+    query_embedding = bi_encoder.encode(query, show_progress_bar=False, device=device)
 
     # Calculate similarity between query embedding and the embeddings of all call titles and store as new df column
     df['be_scores'] = distances_from_embeddings(query_embedding, df['embeddings'].values, distance_metric='cosine')
@@ -206,11 +173,6 @@ def evaluate_calls(df, k, query, encoder_1, encoder_2, ce_check=False):
     # Create copy of dataframe with the k rows that have the highest be_scores
     top_k_be_scores = df.nlargest(k, 'be_scores')['be_scores']
     df_top_k = df[df['be_scores'].isin(top_k_be_scores)].copy()
-
-    if ce_check:
-        # Score k calls with largest be_scores with Cross-Encoder
-        cross_encoder_input = [[query, r.call] for _, r in df_top_k.iterrows()]
-        df_top_k['ce_scores'] = encoder_2.predict(cross_encoder_input, show_progress_bar=False)
 
     return df_top_k
 
