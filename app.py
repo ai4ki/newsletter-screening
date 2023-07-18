@@ -78,14 +78,6 @@ with cols[0]:
     st.markdown("")
     nl_analyze = st.button("Newsletter auswerten")
 
-# Load transformer models
-with cols[1]:
-    with st.spinner("Wir laden das Modell -- bitte hab einen Augenblick Geduld :)"):
-        try:
-            encoder, _ = load_transformers_stateless(run_ce_check)
-        except:
-            st.warning("Some error occured while loading models -- please rerun the app!")
-
 # Build the page's second column: evaluation results
 if nl_analyze:
     # Load titles, queries, and descriptions of research departments
@@ -99,6 +91,14 @@ if nl_analyze:
     condition = filtered_df.call.apply(lambda x: keyword_check(x))
     filtered_df = filtered_df.loc[condition]
     n_calls_filtered = len(filtered_df.index)
+
+    # load transformer models
+    with cols[1]:
+        with st.spinner("Wir laden das Modell -- bitte hab einen Augenblick Geduld :)"):
+            try:
+                encoder, _ = load_transformers_stateless(run_ce_check)
+            except:
+                st.warning("Some error occured while loading models -- please rerun the app!")
 
     # Encode calls once with Bi-Encoder
     encode_calls(filtered_df, encoder)
@@ -138,4 +138,4 @@ if nl_analyze:
 
             del results_df
 
-st.cache_resource.clear()
+        del encoder
