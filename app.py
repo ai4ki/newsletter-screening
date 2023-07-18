@@ -1,7 +1,9 @@
 import json
+import gc
+
 import streamlit as st
 
-from source.source_local import (load_transformers_stateless,
+from source.source_local import (load_sentence_transformer,
                                  get_mail_data,
                                  preprocess_nl,
                                  encode_calls,
@@ -9,6 +11,10 @@ from source.source_local import (load_transformers_stateless,
                                  keyword_check,
                                  ask_llm,
                                  format_call)
+
+
+# Enable garbage collection
+gc.enable()
 
 # Load page text
 with open("./assets/page_text.txt", "r", encoding="utf-8") as f:
@@ -41,12 +47,6 @@ with st.sidebar:
 
 # Set threshold for LLM evaluation
 llm_threshold = 4 if llm_flag == "streng" else 2
-
-# Set flag for Cross-Encoder re-ranking
-run_ce_check = False
-scores = 'be_scores'
-if run_ce_check:
-    scores = 'ce_scores'
 
 # Load emails from server if not already in session state
 if "mail_data" not in st.session_state:
@@ -94,11 +94,11 @@ if nl_analyze:
 
     # load transformer models
     with cols[1]:
-        with st.spinner("Wir laden das Modell -- bitte hab einen Augenblick Geduld :)"):
+        with st.spinner("Wir laden das Modell. Bitte hab einen Augenblick Geduld :)"):
             try:
-                encoder, _ = load_transformers_stateless(run_ce_check)
+                encoder = load_sentence_transformer()
             except:
-                st.warning("Some error occured while loading models -- please rerun the app!")
+                st.warning("Some error occured while loading the model :(")
 
     # Encode calls once with Bi-Encoder
     encode_calls(filtered_df, encoder)
@@ -110,14 +110,14 @@ if nl_analyze:
         st.markdown("### Auswertung")
         tabs = st.tabs(["FF1", "FF2", "FF3", "FF4", "FF5"])
         for i, dept in enumerate(departments):
-            results_df = evaluate_calls(filtered_df, top_k_be, dept["query"], encoder, None, ce_check=run_ce_check)
+            results_df = evaluate_calls(filtered_df, top_k_be, dept["query"], encoder)
             eval_llm = ""
             one_call_passed = False
 
             with tabs[i]:
                 st.markdown(f'##### {dept["name"]}')
                 st.markdown(f'*{dept["query"]}*')
-                for idx, rows in results_df.sort_values(scores, ascending=False).iterrows():
+                for idx, rows in results_df.sort_values('be_scores', ascending=False).iterrows():
                     client_data = format_call(nl_call_list[idx])
 
                     if llm_flag == "nein":
@@ -138,4 +138,16 @@ if nl_analyze:
 
             del results_df
 
-        del encoder
+        del (
+            encoder,
+            filtered_df,
+            nl_as_df,
+            condition,
+            tabs,
+            nl_content,
+            nl_call_list,
+            page_text,
+            departments
+        )
+
+        gc.collect()
