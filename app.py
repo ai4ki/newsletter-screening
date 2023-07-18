@@ -137,3 +137,5 @@ if nl_analyze:
                     st.markdown("In dieser Ausgabe gab es für das Forschungsfeld keine passenden Ausschreibungen.")
 
             del results_df
+
+st.cache_resource.clear()
