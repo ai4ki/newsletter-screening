@@ -5,6 +5,7 @@ import openai
 import os
 import pandas as pd
 import streamlit as st
+import sys
 
 from datetime import datetime, timedelta
 from scipy import spatial
@@ -42,6 +43,24 @@ def load_transformers(ce_flag):
             st.session_state.cross_encoder = CrossEncoder('cross-encoder/msmarco-MiniLM-L6-en-de-v1',
                                                           device=device,
                                                           max_length=512)
+
+
+def load_transformers_stateless(ce_flag):
+    """Load bi-encoder and cross-encoder
+
+    Keyword argument:
+    ce_flag: bool -- flag for loading cross-encoder
+    """
+
+    bi_encoder = SentenceTransformer('T-Systems-onsite/cross-en-de-roberta-sentence-transformer',
+                                                          device=device)
+    cross_encoder = None
+    if ce_flag:
+        cross_encoder = CrossEncoder('cross-encoder/msmarco-MiniLM-L6-en-de-v1',
+                                                          device=device,
+                                                          max_length=512)
+
+    return bi_encoder, cross_encoder
 
 
 def get_mail_data(subfolder):
@@ -154,7 +173,7 @@ def distances_from_embeddings(query_embedding, embeddings, distance_metric="cosi
     return distances
 
 
-def encode_calls(df):
+def encode_calls(df, encoder):
     """Encode the call titles using the Bi-Encoder and store as new df column
 
         Keyword arguments:
@@ -162,10 +181,10 @@ def encode_calls(df):
     """
 
     df['embeddings'] = df.call.apply(
-        lambda x: st.session_state.bi_encoder.encode(x, show_progress_bar=False, device=device))
+        lambda x: encoder.encode(x, show_progress_bar=False, device=device))
 
 
-def evaluate_calls(df, k, query, ce_check=False):
+def evaluate_calls(df, k, query, encoder_1, encoder_2, ce_check=False):
     """Evaluate calls newsletter by predicting semantic similarity between dept. query and call titles
 
     Keyword arguments:
@@ -179,7 +198,7 @@ def evaluate_calls(df, k, query, ce_check=False):
     """
 
     # Encode the query using the Bi-Encoder
-    query_embedding = st.session_state.bi_encoder.encode(query, show_progress_bar=False, device=device)
+    query_embedding = encoder_1.encode(query, show_progress_bar=False, device=device)
 
     # Calculate similarity between query embedding and the embeddings of all call titles and store as new df column
     df['be_scores'] = distances_from_embeddings(query_embedding, df['embeddings'].values, distance_metric='cosine')
@@ -191,7 +210,7 @@ def evaluate_calls(df, k, query, ce_check=False):
     if ce_check:
         # Score k calls with largest be_scores with Cross-Encoder
         cross_encoder_input = [[query, r.call] for _, r in df_top_k.iterrows()]
-        df_top_k['ce_scores'] = st.session_state.cross_encoder.predict(cross_encoder_input, show_progress_bar=False)
+        df_top_k['ce_scores'] = encoder_2.predict(cross_encoder_input, show_progress_bar=False)
 
     return df_top_k
 
