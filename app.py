@@ -13,7 +13,7 @@ from source.source_local import (load_sentence_transformer,
                                  format_call)
 
 
-# Enable garbage collection
+# Enable Wall-e
 gc.enable()
 
 # Load page text
@@ -65,7 +65,7 @@ if st.session_state.mail_data:
 with cols[0]:
     st.markdown("### service.bund.de")
     st.markdown("###### Wähle einen Newsletter:")
-    nl_selected = st.selectbox("Select Newsletter", newsletters, label_visibility="collapsed")
+    nl_selected = st.selectbox("Select Newsletter", reversed(newsletters), label_visibility="collapsed")
     nl_index = newsletters.index(nl_selected)
 
     nl_content = st.session_state.mail_data["data"][nl_index]["content"]
@@ -94,7 +94,7 @@ if nl_analyze:
 
     # load transformer models
     with cols[1]:
-        with st.spinner("Wir laden das Modell. Bitte hab einen Augenblick Geduld :)"):
+        with st.spinner("Wir laden das Modell, kann bisschen dauern ...:coffee:"):
             try:
                 encoder = load_sentence_transformer()
             except:
@@ -109,34 +109,35 @@ if nl_analyze:
     with cols[1]:
         st.markdown("### Auswertung")
         tabs = st.tabs(["FF1", "FF2", "FF3", "FF4", "FF5"])
-        for i, dept in enumerate(departments):
-            results_df = evaluate_calls(filtered_df, top_k_be, dept["query"], encoder)
-            eval_llm = ""
-            one_call_passed = False
+        with st.spinner("... läuft...:rocket:"):
+            for i, dept in enumerate(departments):
+                results_df = evaluate_calls(filtered_df, top_k_be, dept["query"], encoder)
+                eval_llm = ""
+                one_call_passed = False
 
-            with tabs[i]:
-                st.markdown(f'##### {dept["name"]}')
-                st.markdown(f'*{dept["query"]}*')
-                for idx, rows in results_df.sort_values('be_scores', ascending=False).iterrows():
-                    client_data = format_call(nl_call_list[idx])
+                with tabs[i]:
+                    st.markdown(f'##### {dept["name"]}')
+                    st.markdown(f'*{dept["query"]}*')
+                    for idx, rows in results_df.sort_values('be_scores', ascending=False).iterrows():
+                        client_data = format_call(nl_call_list[idx])
 
-                    if llm_flag == "nein":
-                        st.markdown(f"{client_data}", unsafe_allow_html=True)
-                    else:
-                        eval_llm = ask_llm(dept["description"], rows.call)
-                        if eval_llm.isnumeric():
-                            if int(eval_llm) >= llm_threshold:
-                                st.markdown(f"{client_data}", unsafe_allow_html=True)
-                                one_call_passed = True
+                        if llm_flag == "nein":
+                            st.markdown(f"{client_data}", unsafe_allow_html=True)
                         else:
-                            st.markdown(
-                                f"{client_data}**Achtung: Es erfolgte keine Bewertung durch das Sprachmodell!**",
-                                unsafe_allow_html=True)
+                            eval_llm = ask_llm(dept["description"], rows.call)
+                            if eval_llm.isnumeric():
+                                if int(eval_llm) >= llm_threshold:
+                                    st.markdown(f"{client_data}", unsafe_allow_html=True)
+                                    one_call_passed = True
+                            else:
+                                st.markdown(
+                                    f"{client_data}**Achtung: Es erfolgte keine Bewertung durch das Sprachmodell!**",
+                                    unsafe_allow_html=True)
 
-                if llm_flag != "nein" and not one_call_passed:
-                    st.markdown("In dieser Ausgabe gab es für das Forschungsfeld keine passenden Ausschreibungen.")
+                    if llm_flag != "nein" and not one_call_passed:
+                        st.markdown("In dieser Ausgabe gab es für das Forschungsfeld keine passenden Ausschreibungen.")
 
-            del results_df
+                del results_df
 
         del (
             encoder,
