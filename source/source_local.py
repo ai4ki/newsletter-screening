@@ -17,7 +17,7 @@ PASSWORD = os.environ['PASSWORD']
 IMAP_SERVER = os.environ['IMAP_SERVER']
 
 # Download emails from the past x days
-EMAIL_RANGE = 7
+EMAIL_RANGE = 14
 
 # Set the OpenAI API key
 openai.api_key = OPENAI_API_KEY
