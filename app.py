@@ -94,7 +94,7 @@ if nl_analyze:
 
     # load transformer models
     with cols[1]:
-        with st.spinner("Wir laden das Modell, kann bisschen dauern ...:coffee:"):
+        with st.spinner("Wir laden das Modell, das kann ein bisschen dauern ...:coffee:"):
             try:
                 encoder = load_sentence_transformer()
             except:
